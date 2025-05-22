@@ -187,7 +187,7 @@ export default function PaymentForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/proxy/payment", {
+    await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/api/payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     })
@@ -261,17 +261,14 @@ export default function PaymentForm() {
                 if ("COMPLETE" === checkoutActionCode) {
                   console.log("Checkout with card successful:", payload);
 
-                  fetch(
-                    process.env.NEXT_PUBLIC_BACKEND_URL + "/proxy/checkout",
-                    {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        token: data.order?.token,
-                        payload: JSON.stringify(payload),
-                      }),
-                    }
-                  )
+                  fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/api/checkout", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      token: data.order?.token,
+                      payload: JSON.stringify(payload),
+                    }),
+                  })
                     .then((response) => response.json())
                     .then(async (data) => {
                       console.log("Payment response:", data);
