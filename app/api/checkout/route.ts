@@ -1,25 +1,20 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
-  }
-
+export async function POST(req: NextRequest) {
   try {
+    const body = await req.json();
+
     const response = await fetch(
       process.env.NEXT_PUBLIC_PAYLANDS_URL +
         "/gateway/MASTERCARD/" +
-        req.body.token,
+        body.token,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          payload: req.body.payload,
+          payload: body.payload,
         }),
       }
     );
@@ -32,11 +27,12 @@ export default async function handler(
     }
 
     const result = JSON.parse(text);
-    res.status(200).json(result);
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error("Error en /api/checkout:", error.message);
-    res
-      .status(500)
-      .json({ error: "Error en la solicitud de pago", details: error.message });
+    return NextResponse.json(
+      { error: "Error en la solicitud de pago", details: error.message },
+      { status: 500 }
+    );
   }
 }
