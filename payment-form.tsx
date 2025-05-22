@@ -305,7 +305,6 @@ export default function PaymentForm() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {registrationSuccess ? (
-        // Vista de éxito traducida
         <main className="flex-1 flex flex-col items-center justify-center px-4 py-8">
           <div className="w-full max-w-md">
             <Card className="p-8 flex flex-col items-center">

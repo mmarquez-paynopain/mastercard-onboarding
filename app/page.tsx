@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import PaymentForm from "../payment-form";
 
 export default function Page() {
