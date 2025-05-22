@@ -6,6 +6,11 @@ dotenv.config();
 
 const app = express();
 
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Proxy server listening on port ${PORT}`);
+});
+
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -33,7 +38,7 @@ app.post("/proxy/payment", async (req, res) => {
     };
 
     const response = await fetch(
-      process.env.NEXT_PUBLIC_PAYLANDS_URL + "/payment",
+      process.env.NEXT_PUBLIC_PAYLANDS_URL_V1 + "/payment",
       {
         method: "POST",
         headers: {
@@ -73,7 +78,7 @@ app.post("/proxy/checkout", async (req, res) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          payload: JSON.stringify(req.body.payload),
+          payload: req.body.payload,
         }),
       }
     );

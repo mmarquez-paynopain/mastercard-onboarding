@@ -4,22 +4,6 @@ import { useEffect, useState } from "react";
 import PaymentForm from "../payment-form";
 
 export default function Page() {
-  const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/proxy/payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then(async (data) => {
-        setToken(data.order?.token ?? null);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
-
   useEffect(() => {
     window.mcCheckoutService = new MastercardCheckoutServices();
 
@@ -72,13 +56,7 @@ export default function Page() {
 
   return (
     <>
-      {loading ? (
-        <div className="min-h-screen flex items-center justify-center">
-          <span>Cargando...</span>
-        </div>
-      ) : (
-        <PaymentForm token={token} />
-      )}
+      <PaymentForm />
     </>
   );
 }
