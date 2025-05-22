@@ -8,25 +8,12 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch((process.env.NEXT_PUBLIC_PAYLANDS_URL + "/payment") as string, {
+    fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/proxy/payment", {
       method: "POST",
-      headers: {
-        Authorization: `Basic ${process.env.NEXT_PUBLIC_PAYLANDS_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        signature: process.env.NEXT_PUBLIC_PAYLANDS_SIGNATURE,
-        amount: 0,
-        operative: "AUTHORIZATION",
-        secure: true,
-        customer_ext_id: "mastercard_clicktopay_onboarding",
-        currency: "EUR",
-        service: process.env.NEXT_PUBLIC_PAYLANDS_SERVICE,
-        description: "mastercard clicktopay onboarding",
-      }),
+      headers: { "Content-Type": "application/json" },
     })
-      .then((res) => res.json())
-      .then((data) => {
+      .then((response) => response.json())
+      .then(async (data) => {
         setToken(data.order?.token ?? null);
         setLoading(false);
       })

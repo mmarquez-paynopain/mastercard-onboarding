@@ -187,22 +187,16 @@ export default function PaymentForm({ token }: { token: string | null }) {
             if ("COMPLETE" === checkoutActionCode) {
               console.log("Checkout with card successful:", payload);
 
-              await fetch(
-                process.env.NEXT_PUBLIC_PAYLANDS_URL +
-                  "/gateway/MASTERCARD/" +
-                  token,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    payload: JSON.stringify(payload),
-                  }),
-                }
-              )
+              fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/proxy/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  token: token,
+                  payload: JSON.stringify(payload),
+                }),
+              })
                 .then((response) => response.json())
-                .then((data) => {
+                .then(async (data) => {
                   console.log("Payment response:", data);
                   if (data.redirect_url) {
                     window.location.href = data.redirect_url;
