@@ -8,7 +8,7 @@ export default function Page() {
     window.mcCheckoutService = new MastercardCheckoutServices();
 
     const initParams = {
-      srcDpaId: "1cc38e29-2bf8-4318-8a98-8aad0a51c840_dpa0",
+      srcDpaId: "f8b5c36f-efd6-409a-8102-588dc785d707",
       cardBrands: ["mastercard", "visa"],
       dpaTransactionOptions: {
         dpaAcceptedBillingCountries: [],
