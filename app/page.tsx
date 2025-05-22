@@ -54,9 +54,5 @@ export default function Page() {
     window.mcCheckoutService.init(initParams);
   }, []);
 
-  return (
-    <>
-      <PaymentForm />
-    </>
-  );
+  return <PaymentForm />;
 }
