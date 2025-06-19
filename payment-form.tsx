@@ -245,121 +245,131 @@ export default function PaymentForm() {
     e.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
-    if (!validate()) return;
+    try {
+      if (!validate()) return;
 
-    await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/api/payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    })
-      .then((response) => response.json())
-      .then(async (data) => {
-        console.log("Token received:", data.order?.token);
+      await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/api/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((response) => response.json())
+        .then(async (data) => {
+          console.log("Token received:", data.order?.token);
 
-        const [panExpirationMonth, panExpirationYear] = expiryDate.split("/");
+          const [panExpirationMonth, panExpirationYear] = expiryDate.split("/");
 
-        try {
-          const encrypted = await window.mcCheckoutService.encryptCard({
-            primaryAccountNumber: cardNumber,
-            panExpirationMonth,
-            panExpirationYear,
-            cardSecurityCode: cvv,
-            cardholderFirstName: firstName,
-            cardholderLastName: lastName,
-          });
-          console.log("Card encrypted successfully:", encrypted);
+          try {
+            const encrypted = await window.mcCheckoutService.encryptCard({
+              primaryAccountNumber: cardNumber,
+              panExpirationMonth,
+              panExpirationYear,
+              cardSecurityCode: cvv,
+              cardholderFirstName: firstName,
+              cardholderLastName: lastName,
+            });
+            console.log("Card encrypted successfully:", encrypted);
 
-          setShowIframe(true);
+            setShowIframe(true);
 
-          setTimeout(async () => {
-            try {
-              if (iframeRef.current && iframeRef.current.contentWindow) {
-                const payload =
-                  await window.mcCheckoutService.checkoutWithNewCard({
-                    windowRef: iframeRef.current.contentWindow,
-                    encryptedCard: encrypted.encryptedCard,
-                    cardBrand: encrypted.cardBrand,
-                    recognitionTokenRequested: true,
-                    rememberMe: true,
-                    consumer: {
-                      emailAddress: email,
-                      firstName: firstName,
-                      lastName: lastName,
-                    },
-                    dpaTransactionOptions: {
-                      dpaAcceptedBillingCountries: [],
-                      dpaAcceptedShippingCountries: [],
-                      dpaBillingPreference: "NONE",
-                      dpaShippingPreference: "NONE",
-                      dpaLocale: selectedLanguage,
-                      consumerNameRequested: false,
-                      consumerEmailAddressRequested: false,
-                      consumerPhoneNumberRequested: false,
-                      threeDsPreference: "NONE",
-                      authenticationPreferences: {
-                        payloadRequested: "AUTHENTICATED",
+            setTimeout(async () => {
+              try {
+                if (iframeRef.current && iframeRef.current.contentWindow) {
+                  const payload =
+                    await window.mcCheckoutService.checkoutWithNewCard({
+                      windowRef: iframeRef.current.contentWindow,
+                      encryptedCard: encrypted.encryptedCard,
+                      cardBrand: encrypted.cardBrand,
+                      recognitionTokenRequested: true,
+                      rememberMe: true,
+                      consumer: {
+                        emailAddress: email,
+                        firstName: firstName,
+                        lastName: lastName,
                       },
-                      merchantCategoryCode: "0001",
-                      merchantCountryCode: "ES",
-                      acquirerBIN: process.env.NEXT_PUBLIC_ACQUIRER_BIN,
-                      acquirerMerchantId: process.env.NEXT_PUBLIC_ACQUIRER_MID,
-                      paymentOptions: [
-                        {
-                          dpaDynamicDataTtlMinutes: 15,
-                          dynamicDataType:
-                            "CARD_APPLICATION_CRYPTOGRAM_SHORT_FORM",
+                      dpaTransactionOptions: {
+                        dpaAcceptedBillingCountries: [],
+                        dpaAcceptedShippingCountries: [],
+                        dpaBillingPreference: "NONE",
+                        dpaShippingPreference: "NONE",
+                        dpaLocale: selectedLanguage,
+                        consumerNameRequested: false,
+                        consumerEmailAddressRequested: false,
+                        consumerPhoneNumberRequested: false,
+                        threeDsPreference: "NONE",
+                        authenticationPreferences: {
+                          payloadRequested: "AUTHENTICATED",
                         },
-                      ],
-                      confirmPayment: false,
-                      transactionAmount: {
-                        transactionAmount: 0,
-                        transactionCurrencyCode: "EUR",
+                        merchantCategoryCode: "0001",
+                        merchantCountryCode: "ES",
+                        acquirerBIN: process.env.NEXT_PUBLIC_ACQUIRER_BIN,
+                        acquirerMerchantId:
+                          process.env.NEXT_PUBLIC_ACQUIRER_MID,
+                        paymentOptions: [
+                          {
+                            dpaDynamicDataTtlMinutes: 15,
+                            dynamicDataType:
+                              "CARD_APPLICATION_CRYPTOGRAM_SHORT_FORM",
+                          },
+                        ],
+                        confirmPayment: false,
+                        transactionAmount: {
+                          transactionAmount: 0,
+                          transactionCurrencyCode: "EUR",
+                        },
                       },
-                    },
-                  });
-
-                const checkoutActionCode = payload.checkoutActionCode;
-                if ("COMPLETE" === checkoutActionCode) {
-                  console.log("Checkout with card successful:", payload);
-
-                  fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/api/checkout", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      token: data.order?.token,
-                      payload: JSON.stringify(payload),
-                    }),
-                  })
-                    .then((response) => response.json())
-                    .then(async (data) => {
-                      console.log("Payment response:", data);
-                      setShowIframe(false);
-                      setRegistrationSuccess(true);
-                    })
-                    .catch((error) => {
-                      console.error("Error during payment:", error);
-                      setShowIframe(false);
                     });
+
+                  const checkoutActionCode = payload.checkoutActionCode;
+                  if ("COMPLETE" === checkoutActionCode) {
+                    console.log("Checkout with card successful:", payload);
+
+                    fetch(
+                      process.env.NEXT_PUBLIC_BACKEND_URL + "/api/checkout",
+                      {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          token: data.order?.token,
+                          payload: JSON.stringify(payload),
+                        }),
+                      }
+                    )
+                      .then((response) => response.json())
+                      .then(async (data) => {
+                        console.log("Payment response:", data);
+                        setShowIframe(false);
+                        setRegistrationSuccess(true);
+                      })
+                      .catch((error) => {
+                        console.error("Error during payment:", error);
+                        setShowIframe(false);
+                      });
+                  } else {
+                    console.log("Checkout with card not completed:", payload);
+                    setShowIframe(false);
+                  }
                 } else {
-                  console.log("Checkout with card not completed:", payload);
+                  console.error("No se pudo obtener la referencia del iframe.");
                   setShowIframe(false);
                 }
-              } else {
-                console.error("No se pudo obtener la referencia del iframe.");
+              } catch (error) {
+                console.error("Error in checkoutWithNewCard:", error);
                 setShowIframe(false);
               }
-            } catch (error) {
-              console.error("Error in checkoutWithNewCard:", error);
-              setShowIframe(false);
-            }
-          }, 300);
-        } catch (error) {
-          console.error("Error with checkout:", error);
-          setShowIframe(false);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching token:", error);
-      });
+            }, 300);
+          } catch (error) {
+            console.error("Error with checkout:", error);
+            setShowIframe(false);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching token:", error);
+        });
+    } catch (error) {
+      // Si hay un error, vuelve a habilitar el botón
+      setIsSubmitting(false);
+      // Muestra el error al usuario si es necesario
+    }
   };
 
   return (
