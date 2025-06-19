@@ -347,19 +347,23 @@ export default function PaymentForm() {
                   } else {
                     console.log("Checkout with card not completed:", payload);
                     setShowIframe(false);
+                    setIsSubmitting(false);
                   }
                 } else {
                   console.error("No se pudo obtener la referencia del iframe.");
                   setShowIframe(false);
+                  setIsSubmitting(false);
                 }
               } catch (error) {
                 console.error("Error in checkoutWithNewCard:", error);
                 setShowIframe(false);
+                setIsSubmitting(false);
               }
             }, 300);
           } catch (error) {
             console.error("Error with checkout:", error);
             setShowIframe(false);
+            setIsSubmitting(false);
           }
         })
         .catch((error) => {
