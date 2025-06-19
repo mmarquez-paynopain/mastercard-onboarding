@@ -190,6 +190,7 @@ export default function PaymentForm() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [showIframe, setShowIframe] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const storedLang =
@@ -242,6 +243,8 @@ export default function PaymentForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     if (!validate()) return;
 
     await fetch(process.env.NEXT_PUBLIC_BACKEND_URL + "/api/payment", {
@@ -579,8 +582,9 @@ export default function PaymentForm() {
                     <Button
                       type="submit"
                       className="bg-gray-200 hover:bg-gray-300 text-gray-800"
+                      disabled={isSubmitting}
                     >
-                      {t.enroll}
+                      {isSubmitting ? "Enviando..." : t.enroll}
                     </Button>
                   </div>
                 </form>
