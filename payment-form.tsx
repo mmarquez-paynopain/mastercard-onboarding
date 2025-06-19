@@ -326,7 +326,7 @@ export default function PaymentForm() {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                      token: data.order?.token,
+                      order_uuid: data.order?.uuid,
                       payload: JSON.stringify(payload),
                     }),
                   })
