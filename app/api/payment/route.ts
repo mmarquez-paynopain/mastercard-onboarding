@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
       amount: 0,
       service: process.env.NEXT_PUBLIC_PAYLANDS_SERVICE,
       secure: true,
+      customer_ext_id: "click-to-pay-onboarding",
     };
 
     const response = await fetch(
